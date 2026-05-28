@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Archer Game - Jai Shree Ram</title>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #ff9933, #ffffff);
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 10px;
+      color: #b22222;
+      font-size: 40px;
+      text-shadow: 2px 2px 5px white;
+    }
+
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      background: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    #gameArea {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Archer */
+    #archer {
+      position: absolute;
+      bottom: 30px;
+      left: 50px;
+      font-size: 80px;
+    }
+
+    /* Arrow */
+    .arrow {
+      position: absolute;
+      font-size: 40px;
+    }
+
+    /* Target */
+    .target {
+      position: absolute;
+      right: 20px;
+      font-size: 70px;
+    }
+
+    #message {
+      position: absolute;
+      top: 80px;
+      width: 100%;
+      font-size: 35px;
+      color: darkred;
+      font-weight: bold;
+      display: none;
+      animation: pop 1s infinite alternate;
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(1.1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🏹 Archer Game 🏹</h1>
+
+  <div id="score">Score: 0</div>
+
+  <div id="message">🚩 JAI SHREE RAM 🚩</div>
+
+  <div id="gameArea">
+    <div id="archer">🏹</div>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById("gameArea");
+    const scoreText = document.getElementById("score");
+    const message = document.getElementById("message");
+
+    let score = 0;
+
+    // Create moving target
+    function createTarget() {
+      const target = document.createElement("div");
+      target.classList.add("target");
+      target.innerHTML = "🎯";
+
+      let targetY = Math.random() * (window.innerHeight - 200) + 50;
+      target.style.top = targetY + "px";
+
+      gameArea.appendChild(target);
+
+      let posX = window.innerWidth;
+
+      const move = setInterval(() => {
+        posX -= 5;
+        target.style.left = posX + "px";
+
+        if (posX < -100) {
+          clearInterval(move);
+          target.remove();
+          createTarget();
+        }
+      }, 20);
+
+      // Shoot arrow on space key
+      document.onkeydown = function(e) {
+        if (e.code === "Space") {
+          shootArrow(target, move);
+        }
+      };
+    }
+
+    function shootArrow(target, move) {
+      const arrow = document.createElement("div");
+      arrow.classList.add("arrow");
+      arrow.innerHTML = "➶";
+
+      let arrowX = 120;
+      let arrowY = target.offsetTop + 20;
+
+      arrow.style.left = arrowX + "px";
+      arrow.style.top = arrowY + "px";
+
+      gameArea.appendChild(arrow);
+
+      const shoot = setInterval(() => {
+        arrowX += 15;
+        arrow.style.left = arrowX + "px";
+
+        const arrowRect = arrow.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+
+        // Collision
+        if (
+          arrowRect.right > targetRect.left &&
+          arrowRect.left < targetRect.right &&
+          arrowRect.top < targetRect.bottom &&
+          arrowRect.bottom > targetRect.top
+        ) {
+          score++;
+          scoreText.innerHTML = "Score: " + score;
+
+          clearInterval(shoot);
+          clearInterval(move);
+
+          arrow.remove();
+          target.remove();
+
+          // Show Jai Shree Ram message
+          message.style.display = "block";
+
+          setTimeout(() => {
+            message.style.display = "none";
+          }, 1200);
+
+          createTarget();
+        }
+
+        // Remove arrow outside screen
+        if (arrowX > window.innerWidth) {
+          clearInterval(shoot);
+          arrow.remove();
+        }
+      }, 20);
+    }
+
+    createTarget();
+  </script>
+
+</body>
+</html>
